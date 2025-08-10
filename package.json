@@ -10,5 +10,10 @@
     "tslib": "^2.3.0"
   },
   "sideEffects": false,
-  "author": "kopy01"
+  "author": "kopy01",
+  "keywords": [
+    "permissions",
+    "angular",
+    "ngx"
+  ]
 }
