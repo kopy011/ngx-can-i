@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Action, Entity, PermissionKey, toKey } from '../permission.registry';
+import { Action, Entity, PermissionKey, Role, toKey } from '../permission.registry';
+import { PermissionConfig, PermissionConfigItem } from '../model/permission-config.model';
 
 @Injectable()
 export class CanIService {
-  public readonly grantedPermissions = new Set<PermissionKey>();
+  private readonly grantedPermissions = new Set<PermissionKey>();
   private readonly grantedRoutePermissions = new Set<string>();
 
   //routes
@@ -30,6 +31,17 @@ export class CanIService {
     const key = b !== undefined ? toKey(a, b) : a;
     this.grantedPermissions.add(key);
     return this;
+  }
+  grantFromConfig(permissions: PermissionConfigItem[]) {
+    permissions
+      .map((permissionItem) => toKey(permissionItem.action, permissionItem.entity))
+      .forEach((permissionKey) => this.grantedPermissions.add(permissionKey));
+  }
+  grantFromConfigByRoles(roles: Role[], permissionConfig: PermissionConfig) {
+    roles.forEach((role) => {
+      const permissions = permissionConfig[role];
+      if (permissions) this.grantFromConfig(permissions);
+    });
   }
 
   //revoke

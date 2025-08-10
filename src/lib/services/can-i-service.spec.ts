@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { CanIService } from './can-i-service';
 import { PermissionKey } from 'ngx-can-i';
-import { Action, Entity } from '../permission.registry';
+import { Action, Entity, Role } from '../permission.registry';
+import { PermissionConfig, PermissionConfigItem } from '../model/permission-config.model';
 
 describe('CanIService', () => {
   let canIService: CanIService;
@@ -82,11 +83,9 @@ describe('CanIService', () => {
     const nonExistentEntity = 'Dog' as Entity;
     beforeEach(() => {
       canIService.grant(permissionKey);
-      console.log(canIService.grantedPermissions);
     });
 
     it('should return true for an existent permission with PermissionKey overload', () => {
-      console.log(canIService.grantedPermissions);
       expect(canIService.has(permissionKey)).toBeTrue();
     });
 
@@ -112,6 +111,48 @@ describe('CanIService', () => {
       canIService.grant(permissionKey).revoke(action, entity);
       expect(canIService.has(permissionKey)).toBeFalse();
       expect(canIService.grant(action, entity).revokeAll().grant(permissionKey).has(action, entity)).toBeTrue();
+    });
+  });
+
+  describe('grantFromConfig', () => {
+    beforeEach(() => canIService.revokeAll());
+
+    const permissions: PermissionConfigItem[] = [
+      {
+        action: 'edit' as Action,
+        entity: 'User' as Entity,
+      },
+      {
+        action: 'create' as Action,
+        entity: 'BlogPost' as Entity,
+      },
+    ];
+
+    const permissionConfig: PermissionConfig = {
+      ['admin' as Role]: [
+        {
+          action: 'create' as Action,
+          entity: 'BlogPost' as Entity,
+        },
+      ],
+      ['user' as Role]: [
+        {
+          action: 'edit' as Action,
+          entity: 'User' as Entity,
+        },
+      ],
+    };
+
+    it('should grant multiple permissions from a PermissionConfigItems', () => {
+      canIService.grantFromConfig(permissions);
+      expect(canIService.has('edit:User' as PermissionKey)).toBeTrue();
+      expect(canIService.has('create:BlogPost' as PermissionKey)).toBeTrue();
+    });
+
+    it('should add permissions for only the given roles', () => {
+      canIService.grantFromConfigByRoles(['admin'] as Role[], permissionConfig);
+      expect(canIService.has('create:BlogPost' as PermissionKey)).toBeTrue();
+      expect(canIService.has('edit:User' as PermissionKey)).toBeFalse();
     });
   });
 
