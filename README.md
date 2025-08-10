@@ -1,63 +1,128 @@
-# NgxCanI
+# Ngx Can I?
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.0.
+## Introduction
 
-## Code scaffolding
+This is a package created for angular developers to help them deal with permissions, router permissions using pipes, guards etc. At some points Casl inspired me since it was the package i used for this purpose for years.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Quick start
 
-```bash
-ng generate component component-name
+Install the package:
+
+```
+npm i -D ngx-can-i
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Provide it in root:
 
-```bash
-ng generate --help
+```
+import { provideCanI } from 'ngx-can-i';
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [,
+    provideBrowserGlobalErrorListeners(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideCanI(),
+  ],
+};
 ```
 
-## Building
+## Basic Usage
 
-To build the library, run:
+### Types
 
-```bash
-ng build ngx-can-i
+You can declare your own types, create a .d.ts for example in src/types and declare your own Action and Entity union types;
+
+```
+import 'ngx-can-i';
+
+declare module 'ngx-can-i' {
+  interface PermissionTypeRegistry {
+    Action: 'read' | 'write';
+    Entity: 'User' | 'BlogPost';
+  }
+}
 ```
 
-This command will compile your project, and the build artifacts will be placed in the `dist/` directory.
+From now on the package will only accept 'read' or 'write' as actions and only 'User' and 'BlogPost' as entities.
 
-### Publishing the Library
+### Building permissions
 
-Once the project is built, you can publish your library by following these steps:
+You can inject CanIService anywhere you want and build your own permissions using grant() function.
 
-1. Navigate to the `dist` directory:
-   ```bash
-   cd dist/ngx-can-i
-   ```
+```
+import { CanIService } from 'ngx-can-i';
 
-2. Run the `npm publish` command to publish your library to the npm registry:
-   ```bash
-   npm publish
-   ```
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet],
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
+})
+export class App implements OnInit {
+  readonly canIService = inject(CanIService); //inject the service
 
-## Running unit tests
+  ngOnInit(): void {
+    this.canIService.grant('read', 'BlogPost'); // read + BlogPost is a valid combo
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+    this.canIService.grant('update', 'Blog'); // invalid combo, you'll get a ts error
+  }
+}
 ```
 
-## Running end-to-end tests
+You can use the PermissionKey (`${action}:${entity}`) overload:
 
-For end-to-end (e2e) testing, run:
+```
+    this.canIService.grant('read:BlogPost'); // it is a valid combo
 
-```bash
-ng e2e
+    this.canIService.grant('update:Blog'); // invalid combo --> ts error
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+You can revoke your permissions using .revoke(action, entity) or .revokeAll() functions
 
-## Additional Resources
+```
+this.canIService.revoke('read', 'BlogPost');
+this.canIService.revoke('read:BlogPost');
+this.canIService.revokeAll();
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+You can even chain these functions together for more fluent permission building:
+
+```
+this.canIService.revokeAll().grant('read', 'BlogPost').grant('write:User');
+```
+
+### Usage in templates
+
+In your template code you can use the built in canI pipe to display components based on the permissions defined previously.
+
+```
+@if("read" | canI : "BlogPost"){
+  <span> It's a blog post! </span>
+}
+```
+
+## Routes
+
+### Building route permissions
+
+You can grant route permissions to define wether the current user can access your page/component or not.
+
+```
+this.canIService.grantRoute('test');
+```
+
+After you have defined all your granted routes you can use CanIVisitGuard on routes you want to protect from unwanted access.
+
+```
+import { canIVisitGuard } from 'ngx-can-i';
+
+export const routes: Routes = [
+  {
+    path: 'test',
+    component: Test,
+    canActivate: [canIVisitGuard],
+  },
+];
+```
