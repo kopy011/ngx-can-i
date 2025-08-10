@@ -12,7 +12,7 @@ Install the package:
 npm i -D ngx-can-i
 ```
 
-Provide it in root:
+Provide it at the root:
 
 ```
 import { provideCanI } from 'ngx-can-i';
@@ -111,6 +111,12 @@ You can grant route permissions to define wether the current user can access you
 
 ```
 this.canIService.grantRoute('test');
+```
+
+You can revoke your granted routes too
+
+```
+this.canIService.revokeRoute('test');
 ```
 
 After you have defined all your granted routes you can use CanIVisitGuard on routes you want to protect from unwanted access.
