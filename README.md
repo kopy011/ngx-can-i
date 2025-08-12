@@ -2,14 +2,14 @@
 
 ## Introduction
 
-This is a package created for angular developers to help them deal with permissions, router permissions using pipes, guards etc. At some points Casl inspired me since it was the package i used for this purpose for years.
+This is a package created for angular developers to help them deal with permissions, router permissions using pipes, guards etc. At some points Casl inspired me since it was the package I used for this purpose for years.
 
 ## Quick start
 
 Install the package:
 
 ```
-npm i -D ngx-can-i
+npm i ngx-can-i
 ```
 
 Provide it at the root:
@@ -20,7 +20,6 @@ import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    ,
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
