@@ -4,6 +4,7 @@ import { CanIService } from '../services/can-i-service';
 
 @Pipe({
   name: 'canI',
+  pure: false,
 })
 export class CanIPipe implements PipeTransform {
   readonly canIService = inject(CanIService);
