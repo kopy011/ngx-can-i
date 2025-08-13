@@ -1,6 +1,6 @@
 {
   "name": "ngx-can-i",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "license": "MIT",
   "peerDependencies": {
     "@angular/common": "^20.1.0",
@@ -15,5 +15,9 @@
     "permissions",
     "angular",
     "ngx"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kopy011/ngx-can-i"
+  }
 }
